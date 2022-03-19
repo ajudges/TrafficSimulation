@@ -10,6 +10,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 link_directories(${OpenCV_LIBRARY_DIRS})
 add_definitions(${OpenCV_DEFINITIONS})
 
+include_directories(include)
 # Find all executables
 file(GLOB project_SRCS src/*.cpp) #src/*.h
 
