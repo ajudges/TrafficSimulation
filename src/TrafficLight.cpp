@@ -2,6 +2,9 @@
 #include <iostream>
 #include <random>
 
+#include <chrono>
+
+using namespace std::chrono;
 /* Implementation of class "MessageQueue" */
 
 /*
@@ -53,17 +56,34 @@ started in a thread when the public method „simulate“ is called. To do this,
 the thread queue in the base class.
 }
 
-// virtual function which is executed in a thread
-void TrafficLight::cycleThroughPhases()
-{
-    // FP.2a : Implement the function with an infinite loop that measures the
-time between two loop cycles
-    // and toggles the current phase of the traffic light between red and green
-and sends an update method
-    // to the message queue using move semantics. The cycle duration should be a
-random value between 4 and 6 seconds.
-    // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms
-between two cycles.
-}
-
 */
+// virtual function which is executed in a thread
+void TrafficLight::cycleThroughPhases() {
+  // FP.2a : Implement the function with an infinite loop that measures the
+  // time between two loop cycles
+  // and toggles the current phase of the traffic light between red and green
+  // and sends an update method
+  // to the message queue using move semantics. The cycle duration should be a
+  // random value between 4 and 6 seconds.
+  // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms
+  // between two cycles.
+  auto stopWatch{high_resolution_clock::now()};
+  while (true) {
+    auto timeDiff = duration_cast<duration<double>>(
+                        high_resolution_clock::now() - stopWatch)
+                        .count();
+    std::cout << "Time difference between cycles is " << timeDiff << " seconds"
+              << std::endl;
+    auto cycleDuration = std::rand() % 3 + 4; // duration to change traffic light state
+    if (timeDiff < cycleDuration) // check if between random values of 4 to 6 seconds
+    {
+      _currentPhase = this->_currentPhase == TrafficLightPhase::green
+                          ? TrafficLightPhase::red
+                          : TrafficLightPhase::green;
+      // DO UPDATE METHOD AFTER NOTIFICIATION IN FP.3
+      _condition.notify_one();
+      stopWatch = high_resolution_clock::now();
+    }
+    std::this_thread::sleep_for(milliseconds(1)); // wait between cycles
+  }
+}
