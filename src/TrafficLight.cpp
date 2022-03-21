@@ -48,15 +48,17 @@ TrafficLightPhase TrafficLight::getCurrentPhase()
 {
     return _currentPhase;
 }
+*/
 
 void TrafficLight::simulate()
 {
     // FP.2b : Finally, the private method „cycleThroughPhases“ should be
-started in a thread when the public method „simulate“ is called. To do this, use
-the thread queue in the base class.
+    // started in a thread when the public method „simulate“ is called. To do this, use
+    // the thread queue in the base class.
+    threads.emplace_back(std::thread(&TrafficLight::cycleThroughPhases, this));
 }
 
-*/
+
 // virtual function which is executed in a thread
 void TrafficLight::cycleThroughPhases() {
   // FP.2a : Implement the function with an infinite loop that measures the
@@ -72,17 +74,17 @@ void TrafficLight::cycleThroughPhases() {
     auto timeDiff = duration_cast<duration<double>>(
                         high_resolution_clock::now() - stopWatch)
                         .count();
-    std::cout << "Time difference between cycles is " << timeDiff << " seconds"
-              << std::endl;
     auto cycleDuration = std::rand() % 3 + 4; // duration to change traffic light state
     if (timeDiff < cycleDuration) // check if between random values of 4 to 6 seconds
     {
-      _currentPhase = this->_currentPhase == TrafficLightPhase::green
-                          ? TrafficLightPhase::red
-                          : TrafficLightPhase::green;
-      // DO UPDATE METHOD AFTER NOTIFICIATION IN FP.3
-      _condition.notify_one();
-      stopWatch = high_resolution_clock::now();
+        std::cout << "Time difference between cycles is " << timeDiff << " seconds"
+              << std::endl;
+        _currentPhase = this->_currentPhase == TrafficLightPhase::green
+                            ? TrafficLightPhase::red
+                            : TrafficLightPhase::green;
+        // DO UPDATE METHOD AFTER NOTIFICIATION IN FP.3
+        _condition.notify_one();
+        stopWatch = high_resolution_clock::now();
     }
     std::this_thread::sleep_for(milliseconds(1)); // wait between cycles
   }
