@@ -18,7 +18,13 @@ class Vehicle;
 
 template <class T> class MessageQueue {
 public:
+  T receive();
+  void send(T &&msg);
+
 private:
+  std::condition_variable _cond;
+  std::mutex _mtx;
+  std::deque<T> _deque;
 };
 
 // FP.1 : Define a class „TrafficLight“ which is a child class of TrafficObject.
@@ -29,7 +35,7 @@ private:
 // the private member _currentPhase which can take „red“ or „green“ as its
 // value.
 
-class TrafficLight: TrafficObject {
+class TrafficLight : TrafficObject {
 public:
   // constructor / desctructor
 
@@ -37,10 +43,7 @@ public:
   void waitForGreen();
   void simulate();
   std::string getCurrentPhase();
-  enum TrafficLightPhase {
-    red,
-    green
-  };
+  enum TrafficLightPhase { red, green };
 
   // typical behaviour methods
 
@@ -56,6 +59,7 @@ private:
 
   std::condition_variable _condition;
   std::mutex _mutex;
+  MessageQueue<TrafficLightPhase> _phase;
 };
 
 #endif
