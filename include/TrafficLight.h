@@ -34,16 +34,17 @@ private:
 // the private method „void cycleThroughPhases()“. Furthermore, there shall be
 // the private member _currentPhase which can take „red“ or „green“ as its
 // value.
+enum TrafficLightPhase { red, green };
 
 class TrafficLight : TrafficObject {
 public:
   // constructor / desctructor
-
+  TrafficLight();
   // getters / setters
   void waitForGreen();
   void simulate();
-  std::string getCurrentPhase();
-  enum TrafficLightPhase { red, green };
+
+  TrafficLightPhase getCurrentPhase();
 
   // typical behaviour methods
 
@@ -59,7 +60,7 @@ private:
 
   std::condition_variable _condition;
   std::mutex _mutex;
-  MessageQueue<TrafficLightPhase> _phase;
+  MessageQueue<TrafficLightPhase> _queue;
 };
 
 #endif

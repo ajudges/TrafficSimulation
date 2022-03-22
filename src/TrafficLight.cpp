@@ -41,7 +41,7 @@ template <typename T> void MessageQueue<T>::send(T &&msg) {
 
 /* Implementation of class "TrafficLight" */
 
-/*
+
 TrafficLight::TrafficLight()
 {
     _currentPhase = TrafficLightPhase::red;
@@ -50,16 +50,20 @@ TrafficLight::TrafficLight()
 void TrafficLight::waitForGreen()
 {
     // FP.5b : add the implementation of the method waitForGreen, in which an
-infinite while-loop
+    // infinite while-loop
     // runs and repeatedly calls the receive function on the message queue.
     // Once it receives TrafficLightPhase::green, the method returns.
+    while (true){
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      auto rec = _queue.receive();
+      if (rec == TrafficLightPhase::green) return;
+    }
 }
 
 TrafficLightPhase TrafficLight::getCurrentPhase()
 {
     return _currentPhase;
 }
-*/
 
 void TrafficLight::simulate() {
   // FP.2b : Finally, the private method „cycleThroughPhases“ should be
@@ -97,7 +101,7 @@ void TrafficLight::cycleThroughPhases() {
       // DO UPDATE METHOD AFTER NOTIFICIATION IN FP.3
       auto ftr =
           std::async(std::launch::async, &MessageQueue<TrafficLightPhase>::send,
-                     &_phase, std::move(_currentPhase));
+                     &_queue, std::move(_currentPhase));
       ftr.wait();
       stopWatch = high_resolution_clock::now();
     }
