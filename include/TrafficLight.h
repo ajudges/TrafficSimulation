@@ -22,9 +22,9 @@ public:
   void send(T &&msg);
 
 private:
-  std::condition_variable _cond;
+  std::condition_variable _condition;
   std::mutex _mtx;
-  std::deque<T> _deque;
+  std::deque<T> _queue;
 };
 
 // FP.1 : Define a class „TrafficLight“ which is a child class of TrafficObject.
@@ -36,7 +36,7 @@ private:
 // value.
 enum TrafficLightPhase { red, green };
 
-class TrafficLight : TrafficObject {
+class TrafficLight : public TrafficObject {
 public:
   // constructor / desctructor
   TrafficLight();
@@ -58,8 +58,6 @@ private:
   // TrafficLightPhase into it by calling send in conjunction with move
   // semantics.
 
-  std::condition_variable _condition;
-  std::mutex _mutex;
   MessageQueue<TrafficLightPhase> _queue;
 };
 

@@ -2,6 +2,7 @@
 #define INTERSECTION_H
 
 #include "TrafficObject.h"
+#include "TrafficLight.h"
 #include <future>
 #include <memory>
 #include <mutex>
@@ -58,6 +59,7 @@ private:
                         // waiting to enter the intersection
   bool _isBlocked; // flag indicating wether the intersection is blocked by a
                    // vehicle
+  TrafficLight _trafficLight;
 };
 
 #endif
