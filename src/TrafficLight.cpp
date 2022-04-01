@@ -34,6 +34,7 @@ template <typename T> void MessageQueue<T>::send(T &&msg) {
   // add vector to queue
   std::cout << "   Message " << msg << " has been sent to the queue"
             << std::endl;
+  _queue.clear(); // remove older redundant signals at intersections
   _queue.emplace_back(std::move(msg));
   _condition.notify_one();
 }
@@ -41,6 +42,7 @@ template <typename T> void MessageQueue<T>::send(T &&msg) {
 /* Implementation of class "TrafficLight" */
 
 TrafficLight::TrafficLight() { _currentPhase = TrafficLightPhase::red; }
+TrafficLight::~TrafficLight() {}
 
 void TrafficLight::waitForGreen() {
   // FP.5b : add the implementation of the method waitForGreen, in which an
@@ -48,7 +50,6 @@ void TrafficLight::waitForGreen() {
   // runs and repeatedly calls the receive function on the message queue.
   // Once it receives TrafficLightPhase::green, the method returns.
   while (true) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     if (_queue.receive() == TrafficLightPhase::green)
       return;
   }
@@ -74,26 +75,24 @@ void TrafficLight::cycleThroughPhases() {
   // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms
   // between two cycles.
 
+  double timeDiff;
+  std::random_device rd;
+  std::uniform_int_distribution<int> dist(4,6);
   auto stopWatch{high_resolution_clock::now()};
+
   while (true) {
 
-    auto timeDiff = duration_cast<duration<double>>(
+    timeDiff = duration_cast<duration<double>>(
                         high_resolution_clock::now() - stopWatch)
                         .count();
-    auto cycleDuration =
-        std::rand() % 3 +
-        4; // random duration of 4 to 6 seconds of traffic light state
-    if (timeDiff >= cycleDuration) {
+    if (timeDiff >= dist(rd)) { // random duration of 4 to 6 seconds of traffic light state
       std::cout << "Time difference between cycles is " << timeDiff
                 << " seconds" << std::endl;
       this->_currentPhase = (this->_currentPhase == TrafficLightPhase::green
                                  ? TrafficLightPhase::red
                                  : TrafficLightPhase::green);
-      // DO UPDATE METHOD AFTER NOTIFICIATION IN FP.3
-      auto ftr =
-          std::async(std::launch::async, &MessageQueue<TrafficLightPhase>::send,
-                     &_queue, std::move(_currentPhase));
-      ftr.wait();
+
+      _queue.send(std::move(_currentPhase));
       stopWatch = high_resolution_clock::now();
     }
     std::this_thread::sleep_for(milliseconds(1)); // wait between cycles
